@@ -12,12 +12,15 @@ import (
 )
 
 func main() {
+	// Random MAC Address
+	sampleMac := RandomMac()
+
+	fmt.Printf("~ ToyDHCP %s\n", time.Now().Format(time.RFC822))
+	fmt.Printf("~ MAC: %X\n\n", sampleMac)
+
 	// Desired IP Address command line argument
 	requestedIP := flag.String("ip4", "", "Requested IPv4 address")
 	flag.Parse()
-
-	// Random MAC Address
-	sampleMac := RandomMac()
 
 	// Build discover packet, don't use actual interface MAC here or actual
 	// computer lease will be returned from DHCP server
@@ -95,7 +98,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Printf("Sent DISCOVER\n\n")
+		fmt.Printf("Sent DISCOVER\n")
 
 		fmt.Printf("Waiting for OFFER..\n\n")
 
@@ -106,7 +109,7 @@ func main() {
 			timeout.Stop()
 
 			fmt.Println("OFFER received!")
-			fmt.Printf("OFFER:\n%+v\n", offer)
+			fmt.Printf("\n%+v\n", offer)
 
 			// Print what server offered
 			fmt.Printf("Server offered: %s", net.IP(offer.YourIP))
@@ -127,6 +130,7 @@ func main() {
 			}
 
 			fmt.Printf("Sent REQUEST for IP: %s\n\n", net.IP(offer.YourIP))
+			fmt.Printf("Waiting for ACK..\n\n")
 
 			// Pull ACK packet
 			ack := <-responses
@@ -134,7 +138,7 @@ func main() {
 			// Make sure we have a positive acknowledge
 			if ack.DHCPMessageType == models.ACKNOWLEDGE {
 				fmt.Println("ACK received!")
-				fmt.Printf("ACK: \n%+v\n", ack)
+				fmt.Printf("\n%+v\n", ack)
 				fmt.Printf("Leased IP: %s", net.IP(ack.YourIP))
 			} else {
 				fmt.Println("Uh-oh! NACK received!")

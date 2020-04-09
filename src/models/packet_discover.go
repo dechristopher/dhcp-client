@@ -1,6 +1,9 @@
 package models
 
-import "net"
+import (
+	"fmt"
+	"net"
+)
 
 /*
  * Builds a basic DISCOVER packet with the MAC address supplied.
@@ -44,14 +47,16 @@ func BuildDiscoverPacket(macAddress []byte, requestedIP *string) DHCPPacket {
 	packet.Data = append(packet.Data, MagicCookieDHCP[:]...)
 	//DHCP Message Type
 	packet.Data = append(packet.Data, []byte{0x35, 0x01, 0x01}...)
-
 	// Requested IP option
 	if *requestedIP != "" {
 		packet.Data = append(packet.Data, []byte{0x32, 0x04}...)
 		packet.Data = append(packet.Data, []byte(net.ParseIP(*requestedIP))[12:16]...)
 	}
-
-	// End Code
+	// Client ID - Option 61
+	clientId := fmt.Sprintf("ToyDHCP-%X", macAddress)
+	packet.Data = append(packet.Data, []byte{0x3d, byte(len(clientId))}...)
+	packet.Data = append(packet.Data, []byte(clientId)...)
+	// End Code - Option 255
 	packet.Data = append(packet.Data, EndCode)
 
 	finishDHCPPacket(&packet)

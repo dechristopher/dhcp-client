@@ -60,8 +60,7 @@ func (p DHCPPacket) Type() DHCPMessageType {
  */
 func (p DHCPPacket) String() string {
 	return fmt.Sprintf(
-		"--------------------------------------------------------------\n"+
-			"Message Type: %x\n"+
+		"Message Type: %x\n"+
 			"Hardware Type: %x\n"+
 			"Hardware Address Length: %x\n"+
 			"Hops: %x\n"+
@@ -79,7 +78,7 @@ func (p DHCPPacket) String() string {
 			"Magic Cookie: %X\n"+
 			"DHCP Message Type: %v\n"+
 			"Additional DHCP Options: \n%v\n"+
-			"--------------------------------------------------------------\n",
+			"~~~~~~~~~\n",
 		p.OpCode,
 		p.HardwareType,
 		p.HardwareAddressLength,

@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 /*
  * Builds a basic REQUEST packet for responding to the DHCP OFFER
  */
@@ -45,7 +47,11 @@ func BuildRequestPacket(macAddress []byte, requestedIP []byte, server []byte) DH
 	// DHCP Server - Option 54
 	packet.Data = append(packet.Data, []byte{0x36, 0x4}...)
 	packet.Data = append(packet.Data, server[:]...)
-	// End Code
+	// Client ID - Option 61
+	clientId := fmt.Sprintf("ToyDHCP-%X", macAddress)
+	packet.Data = append(packet.Data, []byte{0x3d, byte(len(clientId))}...)
+	packet.Data = append(packet.Data, []byte(clientId)...)
+	// End Code - Option 255
 	packet.Data = append(packet.Data, EndCode)
 
 	finishDHCPPacket(&packet)
