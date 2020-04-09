@@ -37,3 +37,7 @@ A small selection of important DHCP Option Codes
 - *3* - Router IP Address (4B)
 - *1* - Network Subnet Mask (4B)
 - *255* - End Mark (1B)
+
+## Additional Reading
+[Wikipedia.org - DHCP](https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol)   
+[The TCP/IP Guide - DHCP Options](http://www.tcpipguide.com/free/t_SummaryOfDHCPOptionsBOOTPVendorInformationFields-2.htm)
