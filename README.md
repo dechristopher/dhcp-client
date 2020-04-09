@@ -11,7 +11,7 @@ Randomizes request MAC address as to not step on the same lease over and over.
 
 ## DHCP Protocol Diagram
 
-![flow](img/flow.png)
+![flow](img/flow.png)  
 Wikipedia - Gelmo96 / CC BY-SA (https://creativecommons.org/licenses/by-sa/4.0)
 
 ## DHCP Packets (DORA)
