@@ -9,12 +9,22 @@ Randomizes request MAC address as to not step on the same lease over and over.
 ./toydhcp [-ip4 address]
 ```
 
+## Outline
+- [DHCP Protocol Diagram](#dhcp-protocol-diagram)
+- [DHCP Packet Sequence](#dhcp-packet-sequence)
+    1. [DISCOVER](#discover)
+    2. [OFFER](#offer)
+    3. [REQUEST](#request)
+    4. [(N)ACKNOWLEDGE](#nacknowledge)
+- [DHCP Option Codes](#dhcp-option-codes)
+- [Additional Reading](#additional-reading)
+
 ## DHCP Protocol Diagram
 
 ![flow](img/flow.png)  
 Wikipedia - Gelmo96 / CC BY-SA (https://creativecommons.org/licenses/by-sa/4.0)
 
-## DHCP Packets (DORA)
+## DHCP Packet Sequence
 
 #### DISCOVER
 ![discover](img/discover.png)
