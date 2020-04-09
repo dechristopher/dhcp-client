@@ -18,13 +18,13 @@ func main() {
 		fmt.Sprintf("%s:67", net.IP{255, 255, 255, 255}))
 
 	// Client address is 0.0.0.0:68 (all adapters) on the local machine
-	netClient, err := net.ResolveUDPAddr("udp", "0.0.0.0:68")
+	clientAddr, err := net.ResolveUDPAddr("udp", "0.0.0.0:68")
 	if err != nil {
 		fmt.Printf("Error: %+v", err)
 		os.Exit(1)
 	}
 
-	conn, err := net.DialUDP("udp", netClient, serverAddr)
+	conn, err := net.DialUDP("udp", clientAddr, serverAddr)
 	// Defer UDP connection close so we can handle errors on close
 	defer func() {
 		if conn != nil {
@@ -42,12 +42,12 @@ func main() {
 
 	// Channel for responses
 	responses := make(chan []byte)
-	// UDP server to listen for responses
-	respServer, err := net.ListenUDP("udp", netClient)
+	// UDP listener
+	listener, err := net.ListenUDP("udp", clientAddr)
 	// Defer UDP listener close so we can handle errors on close
 	defer func() {
-		if respServer != nil {
-			err := respServer.Close()
+		if listener != nil {
+			err := listener.Close()
 			if err != nil {
 				fmt.Printf("UDP listen close error: %+v\n", err)
 			}
@@ -55,7 +55,7 @@ func main() {
 	}()
 
 	if err != nil {
-		fmt.Printf("Response channel error: %+v\n", err)
+		fmt.Printf("Listener error: %+v\n", err)
 		os.Exit(1)
 	}
 
@@ -70,7 +70,7 @@ func main() {
 	 */
 	go func() {
 		respBuffer := make([]byte, 2048)
-		_, _, err := respServer.ReadFromUDP(respBuffer)
+		_, _, err := listener.ReadFromUDP(respBuffer)
 		if err != nil {
 			fmt.Printf("UDP read error  %v", err)
 			os.Exit(1)
