@@ -1,30 +1,37 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net"
 	"os"
 	"time"
 
-	"github.com/dechristopher/dhcp-client/src/client"
+	"github.com/dechristopher/dhcp-client/src/models"
 )
 
 func main() {
-	// Build discover packet
-	discoverPacket := client.BuildDiscoverPacket([6]byte{0xE4, 0xB3, 0x18, 0xCA, 0x84, 0x83})
+	// Desired IP Address
+	requestedIP := flag.String("ip4", "", "Requested IPv4 address")
+	flag.Parse()
+
+	// Build discover packet, don't use actual interface IP here or actual lease will be returned
+	discoverPacket := models.BuildDiscoverPacket([6]byte{0xA0, 0x99, 0x9B, 0x0C, 0xDE, 0xC8}, requestedIP)
 
 	// Server Address is the broadcast address on port 67 (255.255.255.255:67)
-	serverAddr, _ := net.ResolveUDPAddr("udp",
+	serverAddr, _ := net.ResolveUDPAddr("udp4",
 		fmt.Sprintf("%s:67", net.IP{255, 255, 255, 255}))
 
 	// Client address is 0.0.0.0:68 (all adapters) on the local machine
-	clientAddr, err := net.ResolveUDPAddr("udp", "0.0.0.0:68")
+	clientAddr, err := net.ResolveUDPAddr("udp4",
+		fmt.Sprintf("%s:4500", net.IP{0, 0, 0, 0}))
 	if err != nil {
 		fmt.Printf("Error: %+v", err)
 		os.Exit(1)
 	}
+	fmt.Printf("Listen: %s:%d\n", clientAddr.IP, clientAddr.Port)
 
-	conn, err := net.DialUDP("udp", clientAddr, serverAddr)
+	conn, err := net.DialUDP("udp4", clientAddr, serverAddr)
 	// Defer UDP connection close so we can handle errors on close
 	defer func() {
 		if conn != nil {
@@ -43,7 +50,7 @@ func main() {
 	// Channel for responses
 	responses := make(chan []byte)
 	// UDP listener
-	listener, err := net.ListenUDP("udp", clientAddr)
+	listener, err := net.ListenPacket("udp4", "0.0.0.0:68")
 	// Defer UDP listener close so we can handle errors on close
 	defer func() {
 		if listener != nil {
@@ -70,7 +77,7 @@ func main() {
 	 */
 	go func() {
 		respBuffer := make([]byte, 2048)
-		_, _, err := listener.ReadFromUDP(respBuffer)
+		_, _, err := listener.ReadFrom(respBuffer)
 		if err != nil {
 			fmt.Printf("UDP read error  %v", err)
 			os.Exit(1)
@@ -78,7 +85,7 @@ func main() {
 		responses <- respBuffer
 	}()
 
-	fmt.Printf("Sending DISCOVER packet\n\n")
+	fmt.Printf("Sending DISCOVER\n\n")
 
 	/*
 	 * If the timeout is reached, the DISCOVER is assumed to have failed and
@@ -88,17 +95,17 @@ func main() {
 		// Now that we are listening for offers, send out a DISCOVER
 		_, err = conn.Write(discoverPacket.Data)
 		if err != nil {
-			fmt.Printf("Discover write error: %+v\n", err)
+			fmt.Printf("DISCOVER write error: %+v\n", err)
 			os.Exit(1)
 		}
 
-		fmt.Printf("Waiting for OFFER packet\n\n")
+		fmt.Printf("Waiting for OFFER\n\n")
 		// Channel waits for OFFER packet
 
 		select {
 		case response := <-responses:
 			fmt.Println("OFFER received!")
-			fmt.Printf("OFFER Packet: %+v\n", client.ParseOfferPacket(response))
+			fmt.Printf("OFFER:\n%+v\n", models.ParsePacket(response))
 			os.Exit(0)
 		case <-time.After(2 * time.Second):
 			fmt.Println("DISCOVER timeout, resending packet")
