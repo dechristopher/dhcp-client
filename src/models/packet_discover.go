@@ -43,11 +43,11 @@ func BuildDiscoverPacket(macAddress [6]byte, requestedIP *string) DHCPPacket {
 	// Magic Cookie
 	packet.Data = append(packet.Data, MagicCookieDHCP[:]...)
 	//DHCP Message Type
-	packet.Data = append(packet.Data, []byte{0x35, 0x01, 0x01}[:]...)
+	packet.Data = append(packet.Data, []byte{0x35, 0x01, 0x01}...)
 
 	// Requested IP option
 	if *requestedIP != "" {
-		packet.Data = append(packet.Data, []byte{0x32, 0x04}[:]...)
+		packet.Data = append(packet.Data, []byte{0x32, 0x04}...)
 		packet.Data = append(packet.Data, []byte(net.ParseIP(*requestedIP))[12:16]...)
 	}
 
@@ -55,5 +55,6 @@ func BuildDiscoverPacket(macAddress [6]byte, requestedIP *string) DHCPPacket {
 	packet.Data = append(packet.Data, EndCode)
 
 	finishDHCPPacket(&packet)
+	parseOptions(&packet)
 	return packet
 }

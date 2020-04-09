@@ -15,23 +15,23 @@ import (
  */
 type DHCPPacket struct {
 	Data                  []byte          // Actual Data
-	OpCode                []byte          // 1 Byte 		[0]
-	HardwareType          []byte          // 1 Byte 		[1]
-	HardwareAddressLength []byte          // 1 Byte 		[2]
-	Hops                  []byte          // 1 Byte 		[3]
+	OpCode                []byte          // 1 Byte 	[0]
+	HardwareType          []byte          // 1 Byte 	[1]
+	HardwareAddressLength []byte          // 1 Byte 	[2]
+	Hops                  []byte          // 1 Byte 	[3]
 	TransactionID         []byte          // 4 Bytes 	[4-7]
 	SecondsElapsed        []byte          // 2 Bytes 	[8-9]
 	BootPFlags            []byte          // 2 Bytes 	[10-11]
 	ClientIP              []byte          // 4 Bytes 	[12-15]
 	YourIP                []byte          // 4 Bytes 	[16-19]
-	NextServerIP          []byte          // 4 Bytes 	[20-23]
-	RelayAgentIP          []byte          // 4 Bytes		[24-27]
-	ClientMAC             []byte          // 6 Bytes		[28-33]
+	ServerIP              []byte          // 4 Bytes 	[20-23]
+	RelayAgentIP          []byte          // 4 Bytes	[24-27]
+	ClientMAC             []byte          // 6 Bytes	[28-33]
 	ClientMACPadding      []byte          // 10 Bytes	[34-43]
 	ServerHostname        []byte          // 64 Bytes	[44-107]
 	BootFileName          []byte          // 128 Bytes 	[108-235]
-	MagicCookie           []byte          // 4 Bytes		[236-239]
-	DHCPMessageType       DHCPMessageType // 3 Bytes		[240-243]
+	MagicCookie           []byte          // 4 Bytes	[236-239]
+	DHCPMessageType       DHCPMessageType // 3 Bytes	[240-243]
 	Options               map[int]string  // DHCP options by code
 }
 
@@ -89,7 +89,7 @@ func (p DHCPPacket) String() string {
 		p.BootPFlags,
 		p.ClientIP,
 		p.YourIP,
-		p.NextServerIP,
+		p.ServerIP,
 		p.RelayAgentIP,
 		p.ClientMAC,
 		p.ClientMACPadding,
@@ -124,7 +124,7 @@ func finishDHCPPacket(packet *DHCPPacket) {
 	packet.BootPFlags = packet.Data[10:12]
 	packet.ClientIP = packet.Data[12:16]
 	packet.YourIP = packet.Data[16:20]
-	packet.NextServerIP = packet.Data[20:24]
+	packet.ServerIP = packet.Data[20:24]
 	packet.RelayAgentIP = packet.Data[24:28]
 	packet.ClientMAC = packet.Data[28:34]
 	packet.ClientMACPadding = packet.Data[34:44]
@@ -163,8 +163,8 @@ func parseOptions(packet *DHCPPacket) {
 		}
 
 		// Log option, length, and data
-		fmt.Printf("Option: %v | Length: %v | Data: %v\n",
-			option, length, optionData)
+		//fmt.Printf("Option: %v | Length: %v | Data: %v\n",
+		//	option, length, optionData)
 
 		parseOption(packet, option, optionData)
 	}

@@ -35,7 +35,7 @@ const (
 /*
  * Parse the DHCP Message Type from a given byte
  */
-func ParseDHCPMessageType (mType byte) DHCPMessageType {
+func ParseDHCPMessageType(mType byte) DHCPMessageType {
 	switch mType {
 	case byte(DISCOVER):
 		return DISCOVER
@@ -52,6 +52,9 @@ func ParseDHCPMessageType (mType byte) DHCPMessageType {
 	}
 }
 
+/*
+ *
+ */
 func (t DHCPMessageType) String() string {
 	switch t {
 	case DISCOVER:
