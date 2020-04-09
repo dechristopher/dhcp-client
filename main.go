@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"flag"
 	"fmt"
 	"net"
@@ -16,7 +17,7 @@ func main() {
 	flag.Parse()
 
 	// Random MAC Address
-	sampleMac := [6]byte{0xA0, 0x99, 0x9B, 0x0C, 0xDE, 0xC8}
+	sampleMac := RandomMac()
 
 	// Build discover packet, don't use actual interface MAC here or actual
 	// computer lease will be returned from DHCP server
@@ -48,7 +49,7 @@ func main() {
 	}
 
 	// Channel for responses
-	responses := make(chan []byte)
+	responses := make(chan models.DHCPPacket)
 
 	/*
 	 * Goroutine to listen for DHCP packets
@@ -69,7 +70,13 @@ func main() {
 				fmt.Printf("UDP read error  %v", err)
 				os.Exit(1)
 			}
-			responses <- respBuffer
+
+			packet := models.ParsePacket(respBuffer)
+
+			// Ensure the packet is meant for us
+			if string(packet.ClientMAC) == string(sampleMac) {
+				responses <- packet
+			}
 		}
 	}()
 
@@ -91,16 +98,13 @@ func main() {
 		fmt.Printf("Sent DISCOVER\n\n")
 
 		fmt.Printf("Waiting for OFFER..\n\n")
-		// Channel waits for OFFER packet
 
-		// Wait until we have a response
+		// Wait until we have an OFFER response
 		select {
-		case response := <-responses:
+		case offer := <-responses:
 			// Pause timeout since we're in a flow
 			timeout.Stop()
 
-			// Parse offer packet
-			offer := models.ParsePacket(response)
 			fmt.Println("OFFER received!")
 			fmt.Printf("OFFER:\n%+v\n", offer)
 
@@ -124,11 +128,8 @@ func main() {
 
 			fmt.Printf("Sent REQUEST for IP: %s\n\n", net.IP(offer.YourIP))
 
-			// Pull ACK MESSAGE
-			response = <-responses
-
-			// Parse ACK packet
-			ack := models.ParsePacket(response)
+			// Pull ACK packet
+			ack := <-responses
 
 			// Make sure we have a positive acknowledge
 			if ack.DHCPMessageType == models.ACKNOWLEDGE {
@@ -145,4 +146,20 @@ func main() {
 			fmt.Println("DISCOVER timeout, resending DISCOVER")
 		}
 	}
+}
+
+/*
+ * Generates a pseudo-random MAC address for testing
+ */
+func RandomMac() []byte {
+	buf := make([]byte, 6)
+
+	// Fill buffer with random bytes
+	_, err := rand.Read(buf)
+	if err != nil {
+	}
+
+	// Set the local bit so we don't interfere with registered addresses
+	buf[0] |= 2
+	return buf
 }

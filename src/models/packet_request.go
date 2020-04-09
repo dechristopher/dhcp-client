@@ -3,7 +3,7 @@ package models
 /*
  * Builds a basic REQUEST packet for responding to the DHCP OFFER
  */
-func BuildRequestPacket(macAddress [6]byte, requestedIP []byte, server []byte) DHCPPacket {
+func BuildRequestPacket(macAddress []byte, requestedIP []byte, server []byte) DHCPPacket {
 	packet := DHCPPacket{Data: []byte{}}
 	// Message Type
 	packet.Data = append(packet.Data, BootRequest)

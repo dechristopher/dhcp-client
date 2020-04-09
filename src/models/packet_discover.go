@@ -8,7 +8,7 @@ import "net"
  * (could be derived from the macAddress supplied) as well as using
  * 0.0.0.0 (could specify an interface later on)
  */
-func BuildDiscoverPacket(macAddress [6]byte, requestedIP *string) DHCPPacket {
+func BuildDiscoverPacket(macAddress []byte, requestedIP *string) DHCPPacket {
 	packet := DHCPPacket{Data: []byte{}}
 	// Message Type
 	packet.Data = append(packet.Data, BootRequest)
